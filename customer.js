@@ -15,6 +15,14 @@ var connection = mysql.createConnection({
 
 function new_line() { console.log("\n") }
 
+function query_units(item_id) {
+    connection.query("SELECT * FROM products WHERE ?", { id: item_id }, function (err, results) {
+        if (err) throw err;
+        console.log(results);
+        return (results[0].quantity);
+    });
+}
+
 connection.connect(function (err) {
     if (err) throw err;
     start();
@@ -35,7 +43,7 @@ function start() {
                     return false;
                 }
             }).then(function (response) {
-                if ((response.get_id === "E") || (response.get_id === 'e')){
+                if ((response.get_id === "E") || (response.get_id === 'e')) {
                     connection.end();
                     new_line();
                 }
@@ -51,8 +59,19 @@ function start() {
                             }
                         }).then(function (response2) {
                             new_line();
-                            console.log(`You want ${response2.get_units} items id:${response.get_id}`)
-                            start();
+                            connection.query("SELECT * FROM products WHERE ?", { id: response.get_id }, function (err, results) {
+                                if (err) throw err;
+                                if (results[0].quantity < response2.get_units)
+                                    console.log("\nInsufficient quantity\n");
+                                    else {
+                                        // update quantity in db
+                                        console.log("we have ", results[0].quantity);
+                                        console.log("You want ", response2.get_units);
+                                        // show total cost of purchase
+                                    }
+                                
+                                start();
+                            });
                         });
                 }
             });
