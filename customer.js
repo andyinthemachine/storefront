@@ -15,13 +15,17 @@ var connection = mysql.createConnection({
 
 function new_line() { console.log("\n") }
 
-function query_units(item_id) {
-    connection.query("SELECT * FROM products WHERE ?", { id: item_id }, function (err, results) {
-        if (err) throw err;
-        console.log(results);
-        return (results[0].quantity);
-    });
-}
+
+
+  
+    
+
+
+
+
+
+
+
 
 connection.connect(function (err) {
     if (err) throw err;
@@ -30,53 +34,64 @@ connection.connect(function (err) {
 
 
 function start() {
+    { }
     new_line();
     connection.query("SELECT * FROM products", function (err, results) {
         if (err) throw err;
         console.table(results);
-        inquirer.prompt(
-            {
-                name: "get_id",
-                message: "Enter id of item you would like to buy ('E' to EXIT):",
-                validate: function (value) {
-                    if ((isNaN(value) === false || value === 'E' || value === 'e')) return true;
-                    return false;
-                }
-            }).then(function (response) {
-                if ((response.get_id === "E") || (response.get_id === 'e')) {
-                    connection.end();
-                    new_line();
-                }
-                else {
-                    new_line();
-                    inquirer.prompt(
-                        {
+        inquirer.prompt({
+            name: "get_id",
+            message: "Enter id of item you would like to buy ('E' to EXIT):",
+            validate: function (value) {
+                var ids = [];
+                results.forEach(function (item) {
+                    ids.push(item.id);
+                });
+                if (((ids.indexOf(parseInt(value))) >= 0) ||
+                    (value === 'E') ||
+                    (value === 'e')) return true;
+                return false;
+            }
+        }).then(function (response) {
+            if ((response.get_id === "E") || (response.get_id === 'e')) {
+                new_line();
+                connection.end();
+            }
+            else {
+                connection.query("SELECT * FROM products WHERE ?", { id: response.get_id }, function (err, results) {
+                    if (err) throw err;
+                    if (results[0].quantity < 1) {
+                        console.log(`\nNo ${results[0].name} units currently in stock`);
+                        start();
+                    }
+                    else {
+                        new_line();
+                        inquirer.prompt({
                             name: "get_units",
-                            message: "How many would you like?:",
+                            message: `How many ${results[0].name}(s) would you like[1 - ${results[0].quantity}]?`,
                             validate: function (value) {
-                                if (isNaN(value) === false) return true;
+                                if ((isNaN(value) === false) &&
+                                    (parseInt(value) <= results[0].quantity) &&
+                                    (parseInt(value) > 0)) return true;
                                 return false;
                             }
                         }).then(function (response2) {
-                            new_line();
-                            connection.query("SELECT * FROM products WHERE ?", { id: response.get_id }, function (err, results) {
-                                if (err) throw err;
-                                if (results[0].quantity < response2.get_units)
-                                    console.log("\nInsufficient quantity\n");
-                                    else {
-                                        // update quantity in db
-                                        console.log("we have ", results[0].quantity);
-                                        console.log("You want ", response2.get_units);
-                                        // show total cost of purchase
-                                    }
-                                
+                            //show cost of purchase
+                            console.log("\nYour total is: $", results[0].price * parseFloat(response2.get_units));
+                            //update quantity in db 
+                            var new_quantity = results[0].quantity - parseInt(response2.get_units);
+                            connection.query("UPDATE products SET ? WHERE ?", [{ quantity: new_quantity }, { id: results[0].id }], function (error) {
+                                if (error) throw err;
                                 start();
                             });
                         });
-                }
-            });
+                    }
+                });
+            }
+        });
     });
 }
+
 
 
 

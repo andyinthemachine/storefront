@@ -17,12 +17,12 @@ VALUES ("Fischer SL skis", "skis", 800, 10),
 ("Fischer GS skis", "skis", 900, 8),
 ("Fischer GS skis", "skis", 900, 8),
 ("Fischer Free skis", "skis", 750, 15),
-("Look", "bindings", 200, 5),
-("Tyrolia", "bindings", 150, 4),
-("Fischer", "bindings", 150, 11),
-("Leki SL", "poles", 100, 15),
-("Leki GS", "poles", 90, 10),
-("Leki SG", "poles", 110, 10),
-("POC MIPS", "helmets", 800, 10);
+("Look bindings", "bindings", 200, 5),
+("Tyrolia bindings", "bindings", 150, 4),
+("Fischer bindings", "bindings", 150, 11),
+("Leki SL poles", "poles", 100, 15),
+("Leki GS poles", "poles", 90, 10),
+("Leki SG poles", "poles", 110, 10),
+("POC MIPS helmet", "helmets", 800, 10);
 
 SELECT * FROM products;
